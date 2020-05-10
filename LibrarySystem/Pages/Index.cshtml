@@ -1,0 +1,181 @@
+﻿@page
+@{}
+<!DOCTYPE html>
+
+
+<html>
+<head>
+    <title>Library System</title>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            getempList();
+        });
+        var emp = {
+            id: 0,
+            name: "",
+            population: 0,
+            address: ""
+        }
+        // Get all emps to display
+        function getempList() {
+            // Call Web API to get a list of emps
+            $.ajax({
+                url: '/api/GetLib',
+                type: 'GET',
+                dataType: 'json',
+                success: function (emps) {
+                    empListSuccess(emps);
+                },
+                error: function (request, message, error) {
+                    handleException(request, message, error);
+                }
+            });
+        }
+        // Display all emps returned from Web API call
+        function empListSuccess(emps) {
+            // Iterate over the collection of data
+            $("#empTable tbody").remove();
+            $.each(emps, function (index, emp) {
+                // Add a row to the emp table
+                empAddRow(emp);
+            });
+        }
+        // Add emp row to <table>
+        function empAddRow(emp) {
+            // First check if a <tbody> tag exists, add one if not
+            if ($("#empTable tbody").length == 0) {
+                $("#empTable").append("<tbody></tbody>");
+            }
+            // Append row to <table>
+            $("#empTable tbody").append(
+                empBuildTableRow(emp));
+        }
+        // Build a <tr> for a row of table data
+        function empBuildTableRow(emp) {
+            var newRow = "<tr>" +
+                "<td>" + emp.id + "</td>" +
+                "<td><input   class='input-name' type='text' value='" + emp.name + "'/></td>" +
+                "<td><input   class='input-libraryPopulation' type='number' value='" + emp.population + "'/></td>" +
+                "<td><input   class='input-libraryAddress' type='text' value='" + emp.address + "'/></td>" +
+                "<td>" +
+                "<button type='button' " +
+                "onclick='empUpdate(this);' " +
+                "class='btn btn-default' " +
+                "data-id='" + emp.id + "' " +
+                "data-name='" + emp.name + "' " +
+                "data-libraryPopulation='" + emp.population + "' " +
+                "data-libraryAddress='" + emp.address + "' " +
+                ">" +
+                "<span class='glyphicon glyphicon-edit' /> Update" +
+                "</button> " +
+                " <button type='button' " +
+                "onclick='empDelete(this);'" +
+                "class='btn btn-default' " +
+                "data-id='" + emp.id + "'>" +
+                "<span class='glyphicon glyphicon-remove' />Delete" +
+                "</button>" +
+                "</td>" +
+                "</tr>";
+            return newRow;
+        }
+        function onAddemp(item) {
+            var options = {};
+            options.url = "/api/AddLib";
+            options.type = "POST";
+            var obj = emp;
+            obj.name = $("#name").val();
+            obj.population = $("#population").val();
+            obj.address = $("#address").val();
+            console.dir(obj);
+            options.data = JSON.stringify(obj);
+            options.contentType = "application/json";
+            options.dataType = "html";
+            options.success = function (msg) {
+                getempList();
+                $("#msg").html(msg);
+            },
+                options.error = function () {
+                    $("#msg").html("Error while calling the ADD!");
+                };
+            $.ajax(options);
+        }
+        function empUpdate(item) {
+            var id = $(item).data("id");
+            var options = {};
+            options.url = "/api/UpdateLib/"
+            options.type = "PUT";
+            var obj = emp;
+            obj.id = $(item).data("id");
+            obj.name = $(".input-name", $(item).parent().parent()).val();
+            console.dir(obj);
+            options.data = JSON.stringify(obj);
+            options.contentType = "application/json";
+            options.dataType = "html";
+            options.success = function (msg) {
+                $("#msg").html(msg);
+            };
+            options.error = function () {
+                $("#msg").html("Error while calling the Update!");
+            };
+            $.ajax(options);
+        }
+        function empDelete(item) {
+            var id = $(item).data("id");
+            var options = {};
+            options.url = "/api/DeleteLib/"
+                + id;
+            options.type = "DELETE";
+            options.dataType = "html";
+            options.success = function (msg) {
+                console.log('msg= ' + msg);
+                $("#msg").html(msg);
+                getempList();
+            };
+            options.error = function () {
+                $("#msg").html("Error while calling the Delete!");
+            };
+            $.ajax(options);
+        }
+        // Handle exceptions from AJAX calls
+        function handleException(request, message, error) {
+            var msg = "";
+            msg += "Code: " + request.status + "\n";
+            msg += "Text: " + request.statusText + "\n";
+            if (request.responseJSON != null) {
+                msg += "Message" + request.responseJSON.Message + "\n";
+            }
+            alert(msg);
+        }
+    </script>
+</head>
+<body>
+    <h3>Library Management</h3>
+    <form>
+        <table id="empTable" style="border: 1px solid #999" cellpadding="1">
+            <thead>
+                <tr>
+                    <td>Id </td>
+                    <td> Name </td>
+                    <td> Population </td>
+                    <td> Address </td>
+                    <td> </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><input id="name" type="text" /></td>
+                    <td><input id="libraryPopulation" type="text" /></td>
+                    <td><input id="libraryAddress" type="text" /></td>
+                    <td><input type="button" id="insert" value="Insert" onclick='onAddemp(this)' /></td>
+</thead>
+        </table>
+        <br />
+        <div id="msg"></div>
+    </form>
+    Copyright 2017 (c) SmartIT. All rights reserved. By John Kocer
+</body>
+</html>
