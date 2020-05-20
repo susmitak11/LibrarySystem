@@ -22,7 +22,7 @@ namespace LibrarySystem.Controllers
         {
             _context = context;
         }
-
+        //*********GET**************//
         // GET: api/Libraries
         [Route("/api/GetLib")]
         [HttpGet]
@@ -76,6 +76,7 @@ namespace LibrarySystem.Controllers
 
             return NoContent();
         }
+        //**********UPDATE***************
         [Route("/api/UpdateLib")]
         [HttpPut]
         public async Task<ActionResult<Library>> UpdateLib([FromBody]Library library)
@@ -88,7 +89,7 @@ namespace LibrarySystem.Controllers
         // POST: api/Libraries
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for
         // more details see https://aka.ms/RazorPagesCRUD.
-
+        //*******************ADD***************
         [Route("/api/AddLib")]
         [HttpPost]
         public async Task<ActionResult<Library>> PostLibrary(Library library)
@@ -98,7 +99,7 @@ namespace LibrarySystem.Controllers
 
             return CreatedAtAction("GetLibrary", new { id = library.Id }, library);
         }
-
+        //***********DELETE*************
         // DELETE: api/Libraries/5
         [Route("~/api/DeleteLib/{id}")]
         [HttpDelete("{id}")]

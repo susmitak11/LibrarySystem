@@ -1,181 +1,289 @@
 ﻿@page
 @{}
 <!DOCTYPE html>
-
-
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title>Library System</title>
-
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
-            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-            crossorigin="anonymous"></script>
-
-    <script>
-        $(document).ready(function () {
-            getempList();
-        });
-        var emp = {
-            id: 0,
-            name: "",
-            population: 0,
-            address: ""
-        }
-        // Get all emps to display
-        function getempList() {
-            // Call Web API to get a list of emps
-            $.ajax({
-                url: '/api/GetLib',
-                type: 'GET',
-                dataType: 'json',
-                success: function (emps) {
-                    empListSuccess(emps);
-                },
-                error: function (request, message, error) {
-                    handleException(request, message, error);
-                }
-            });
-        }
-        // Display all emps returned from Web API call
-        function empListSuccess(emps) {
-            // Iterate over the collection of data
-            $("#empTable tbody").remove();
-            $.each(emps, function (index, emp) {
-                // Add a row to the emp table
-                empAddRow(emp);
-            });
-        }
-        // Add emp row to <table>
-        function empAddRow(emp) {
-            // First check if a <tbody> tag exists, add one if not
-            if ($("#empTable tbody").length == 0) {
-                $("#empTable").append("<tbody></tbody>");
-            }
-            // Append row to <table>
-            $("#empTable tbody").append(
-                empBuildTableRow(emp));
-        }
-        // Build a <tr> for a row of table data
-        function empBuildTableRow(emp) {
-            var newRow = "<tr>" +
-                "<td>" + emp.id + "</td>" +
-                "<td><input   class='input-name' type='text' value='" + emp.name + "'/></td>" +
-                "<td><input   class='input-libraryPopulation' type='number' value='" + emp.population + "'/></td>" +
-                "<td><input   class='input-libraryAddress' type='text' value='" + emp.address + "'/></td>" +
-                "<td>" +
-                "<button type='button' " +
-                "onclick='empUpdate(this);' " +
-                "class='btn btn-default' " +
-                "data-id='" + emp.id + "' " +
-                "data-name='" + emp.name + "' " +
-                "data-libraryPopulation='" + emp.population + "' " +
-                "data-libraryAddress='" + emp.address + "' " +
-                ">" +
-                "<span class='glyphicon glyphicon-edit' /> Update" +
-                "</button> " +
-                " <button type='button' " +
-                "onclick='empDelete(this);'" +
-                "class='btn btn-default' " +
-                "data-id='" + emp.id + "'>" +
-                "<span class='glyphicon glyphicon-remove' />Delete" +
-                "</button>" +
-                "</td>" +
-                "</tr>";
-            return newRow;
-        }
-        function onAddemp(item) {
-            var options = {};
-            options.url = "/api/AddLib";
-            options.type = "POST";
-            var obj = emp;
-            obj.name = $("#name").val();
-            obj.population = $("#population").val();
-            obj.address = $("#address").val();
-            console.dir(obj);
-            options.data = JSON.stringify(obj);
-            options.contentType = "application/json";
-            options.dataType = "html";
-            options.success = function (msg) {
-                getempList();
-                $("#msg").html(msg);
-            },
-                options.error = function () {
-                    $("#msg").html("Error while calling the ADD!");
-                };
-            $.ajax(options);
-        }
-        function empUpdate(item) {
-            var id = $(item).data("id");
-            var options = {};
-            options.url = "/api/UpdateLib/"
-            options.type = "PUT";
-            var obj = emp;
-            obj.id = $(item).data("id");
-            obj.name = $(".input-name", $(item).parent().parent()).val();
-            console.dir(obj);
-            options.data = JSON.stringify(obj);
-            options.contentType = "application/json";
-            options.dataType = "html";
-            options.success = function (msg) {
-                $("#msg").html(msg);
-            };
-            options.error = function () {
-                $("#msg").html("Error while calling the Update!");
-            };
-            $.ajax(options);
-        }
-        function empDelete(item) {
-            var id = $(item).data("id");
-            var options = {};
-            options.url = "/api/DeleteLib/"
-                + id;
-            options.type = "DELETE";
-            options.dataType = "html";
-            options.success = function (msg) {
-                console.log('msg= ' + msg);
-                $("#msg").html(msg);
-                getempList();
-            };
-            options.error = function () {
-                $("#msg").html("Error while calling the Delete!");
-            };
-            $.ajax(options);
-        }
-        // Handle exceptions from AJAX calls
-        function handleException(request, message, error) {
-            var msg = "";
-            msg += "Code: " + request.status + "\n";
-            msg += "Text: " + request.statusText + "\n";
-            if (request.responseJSON != null) {
-                msg += "Message" + request.responseJSON.Message + "\n";
-            }
-            alert(msg);
-        }
-    </script>
+    <title>Weather</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 </head>
 <body>
-    <h3>Library Management</h3>
-    <form>
-        <table id="empTable" style="border: 1px solid #999" cellpadding="1">
-            <thead>
-                <tr>
-                    <td>Id </td>
-                    <td> Name </td>
-                    <td> Population </td>
-                    <td> Address </td>
-                    <td> </td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td><input id="name" type="text" /></td>
-                    <td><input id="libraryPopulation" type="text" /></td>
-                    <td><input id="libraryAddress" type="text" /></td>
-                    <td><input type="button" id="insert" value="Insert" onclick='onAddemp(this)' /></td>
-</thead>
-        </table>
+
+    <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-warning">
+            <a class="navbar-brand" href="#">International Weather Report</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarText">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <button class="btn btn-danger" data-toggle="modal" data-target="#addLibrary">Add New Library  Record</button>
+                    </li>
+
+                </ul>
+
+            </div>
+        </nav>
         <br />
-        <div id="msg"></div>
-    </form>
-    Copyright 2017 (c) SmartIT. All rights reserved. By John Kocer
+        <br />
+
+        <div class="container">
+            <div class="jumbotron">
+                <table class="table table-striped  table-warning">
+                    <thead>
+                        <tr>
+                           
+                            <th scope="col">Name</th>
+                            <th scope="col">LibraryPopulation</th>
+                            <th scope="col">LibraryAddress</th>
+                            
+
+                        </tr>
+                    </thead>
+                    <tbody id="allLibrarys">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        var uri = 'api/Weathers';
+
+        $(document).ready(function () {
+            // Gets all weather records
+            $.getJSON(uri)
+                .done(function (data) {
+
+                    $("#weatherTemplate").tmpl(data).appendTo("#allLibrarys");
+                });
+        });
+
+        function getLibrary() {
+
+            $.getJSON(uri)
+                .done(function (data) {
+
+                    $("#allLibrarys").text("");
+
+                    $("#weatherTemplate").tmpl(data).appendTo("#allLibrarys");
+                });
+
+        }
+        function addLibrary() {
+            var _Name = $('#Name').val();
+            var _LibraryPopulation = $('#LibraryPopulation').val();
+            var _LibraryAddress = parseInt($('#LibraryAddress').val());
+           
+
+            var weather = {
+                Name: _Name,
+                LibraryPopulation: _LibraryPopulation,
+                LibraryAddress: _LibraryAddress,
+               
+            };
+
+            $.ajax({
+                type: "POST",
+                url: uri,
+                data: JSON.stringify(weather),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#result").html("Success");
+                getAllLibrarys();
+            }).fail(function (jqXHR, textStatus) {
+                $("#result").html("An error occured when registering the Librarys.");
+            });
+        }
+
+        function updateLibrary() {
+            var _Name = $('#weather_Name').val();
+            var _LibraryPopulation = $('#weather_LibraryPopulation').val();
+            var _LibraryAddress = parseInt($('#weather_LibraryAddress').val());
+           
+
+            var weather = {
+                id: parseInt($('#Id').val()),
+                Name: _Name,
+                LibraryPopulation: _LibraryPopulation,
+                LibraryAddress: _LibraryAddress,
+               
+            };
+
+            $.ajax({
+                type: "PUT",
+                url: uri + "/" + $('#Id').val(),
+                data: JSON.stringify(weather),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#resultUpdate").html("Success");
+                getAllLibrarys();
+            }).fail(function (jqXHR, textStatus) {
+                $("#resultUpdate").html("An error occured When updating the weather record");
+            });;
+
+        }
+
+        function remove(id) {
+
+            var yes = confirm("Are you sure you want to delete this weather record?");
+
+            if (yes) {
+                $.ajax({
+                    type: "DELETE",
+                    url: uri + "/" + id,
+
+                }).done(function (response) {
+
+                    getAllLibrarys();
+                });
+
+            }
+
+        }
+
+        function getLibraryForUpdate(id) {
+
+            $.ajax({
+                type: "GET",
+                url: uri + "/" + id,
+                contentType: "application/json"
+            }).done(function (response) {
+
+                $('#Id').val(response.id);
+                $('#weather_Name').val(response.Name);
+                $('#weather_LibraryPopulation').val(response.LibraryPopulation);
+                $('#weather_LibraryAddress').val(response.LibraryAddress);
+               
+
+            });
+
+        }
+    </script>
+
+    <script id="weatherTemplate" type="text/x-jquery-tmpl">
+        <tr>
+
+            <td> ${Name}</td>
+            <td>${LibraryPopulation}</td>
+            <td>${LibraryAddress}</td>
+         
+
+            <td> <button class="btn btn-primary" onclick="getLibraryForUpdate('${id}')" data-toggle="modal" data-target="#updateLibrary">Update</button></td>
+            <td> <a href="#" class="btn btn-danger" onclick="remove('${id}')">Delete</a></td>
+
+        </tr>
+    </script>
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="addLibrary">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Weather Record</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="Name" aria-describedby="emailHelp" placeholder="Name">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">LibraryPopulation</label>
+                            <input type="number" class="form-control" id="LibraryPopulation" aria-describedby="emailHelp" placeholder="LibraryPopulation">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">LibraryAddress</label>
+                            <input type="text" class="form-control" id="LibraryAddress" aria-describedby="emailHelp" placeholder="LibraryAddress">
+
+                        </div>
+   
+
+                        <div class="form-group" id="result">
+
+
+                        </div>
+                        <button type="button" onclick="addLibrary()" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="updateLibrary">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Weather Record</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+
+                        <div class="form-group">
+
+                            <input type="hidden" class="form-control" id="Id" aria-describedby="emailHelp">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" class="form-control" id="weather_Name" aria-describedby="emailHelp" placeholder="Name">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">LibraryPopulation</label>
+                            <input type="text" class="form-control" id="weather_LibraryPopulation" aria-describedby="emailHelp" placeholder="LibraryPopulation">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">LibraryAddress</label>
+                            <input type="number" class="form-control" id="weather_LibraryAddress" aria-describedby="emailHelp" placeholder="LibraryAddress">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Wind Speed</label>
+                            <input type="number" class="form-control" id="weather_windSpeed" aria-describedby="emailHelp" placeholder="WindSpeed">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Feel</label>
+                            <input type="text" class="form-control" id="weather_feel" aria-describedby="emailHelp" placeholder="Feel">
+
+                        </div>
+
+                        <div class="form-group" id="resultUpdate">
+
+
+                        </div>
+                        <button type="button" onclick="updateLibrary()" class="btn btn-primary">Update Record</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
